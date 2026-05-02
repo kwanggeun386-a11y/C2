@@ -19,11 +19,13 @@ if str(ROOT_DIR) not in sys.path:
 from app.config import (
     APP_DATA_DIR,
     DB_DIR,
+    DB_PATH,
     UPLOADS_DIR,
     EXPORTS_DIR,
     UNCLASSIFIED_UPLOADS_DIR,
     UNCLASSIFIED_EXPORTS_DIR,
 )
+from app.db.database import init_db, close_connection
 
 
 def setup_logging() -> None:
@@ -48,16 +50,15 @@ def ensure_app_data_dirs() -> None:
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
     logger.info("app_data 폴더 준비 완료")
-    for d in dirs:
-        logger.info(f"  {d}")
 
 
 def cmd_init_db() -> None:
-    """--init-db: app_data 폴더 생성 + DB 초기화"""
+    """--init-db: app_data 폴더 생성 + SQLite DB 초기화"""
     logger = logging.getLogger(__name__)
     ensure_app_data_dirs()
-    # TODO: Step 2에서 app/db/database.py 구현 후 스키마 생성 연결
-    logger.info("--init-db 완료 (DB 스키마는 Step 2에서 구현 예정)")
+    conn = init_db(DB_PATH)
+    close_connection(conn)
+    logger.info("--init-db 완료")
 
 
 def run_gui() -> None:
