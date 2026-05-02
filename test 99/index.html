@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구구단 우주 탐험 | Multiplication Space Adventure</title>
+    <meta name="description" content="초등학생을 위한 재미있는 구구단 게임! 우주 테마와 함께 수학 실력을 키워보세요.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Start Screen -->
+        <section id="start-screen" class="screen active">
+            <div class="glass-panel">
+                <img src="mascot.png" alt="Space Cat Mascot" class="mascot floating">
+                <h1>구구단 우주 탐험</h1>
+                <p>우주 고양이와 함께 구구단 마스터가 되어보세요!</p>
+                <div class="mode-selection">
+                    <button class="btn primary" onclick="startGame('random')">무작위 도전</button>
+                    <div class="dan-buttons">
+                        <button class="btn secondary" onclick="startGame(2)">2단</button>
+                        <button class="btn secondary" onclick="startGame(3)">3단</button>
+                        <button class="btn secondary" onclick="startGame(4)">4단</button>
+                        <button class="btn secondary" onclick="startGame(5)">5단</button>
+                        <button class="btn secondary" onclick="startGame(6)">6단</button>
+                        <button class="btn secondary" onclick="startGame(7)">7단</button>
+                        <button class="btn secondary" onclick="startGame(8)">8단</button>
+                        <button class="btn secondary" onclick="startGame(9)">9단</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen">
+            <div class="stats-bar">
+                <div class="stat-item">점수: <span id="score">0</span></div>
+                <div class="stat-item">남은 시간: <span id="timer">30</span>초</div>
+            </div>
+            <div class="glass-panel question-panel">
+                <div id="question-display">
+                    <span id="num1">?</span>
+                    <span class="operator">×</span>
+                    <span id="num2">?</span>
+                    <span class="operator">=</span>
+                </div>
+                <div class="input-area">
+                    <input type="number" id="answer-input" placeholder="정답 입력" autofocus autocomplete="off">
+                    <button id="submit-btn" class="btn primary">확인</button>
+                </div>
+            </div>
+            <div id="feedback" class="feedback-msg"></div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="result-screen" class="screen">
+            <div class="glass-panel">
+                <h2>탐험 완료!</h2>
+                <div class="final-score-box">
+                    <p>최종 점수</p>
+                    <div id="final-score">0</div>
+                </div>
+                <p id="result-msg">잘했어요! 더 높은 점수에 도전해보세요.</p>
+                <button class="btn primary" onclick="resetGame()">다시 하기</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Background Elements -->
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

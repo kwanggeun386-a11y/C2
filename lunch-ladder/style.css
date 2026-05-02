@@ -1,0 +1,203 @@
+:root {
+    --primary: #ff4d4d;
+    --primary-glow: rgba(255, 77, 77, 0.5);
+    --secondary: #4d94ff;
+    --bg-dark: #0f172a;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text: #f8fafc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(255, 77, 77, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(77, 148, 255, 0.15) 0px, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.glow-text {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, #ff4d4d, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px var(--primary-glow));
+}
+
+.glass-panel {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.counter {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+}
+
+.counter button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.counter button:hover {
+    opacity: 0.7;
+}
+
+.counter input {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    width: 50px;
+    text-align: center;
+    outline: none;
+}
+
+.inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.input-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-item input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    color: white;
+    outline: none;
+}
+
+.input-item input:focus {
+    border-color: var(--primary);
+}
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #ff4d4d, #f43f5e);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px var(--primary-glow);
+}
+
+.btn-secondary {
+    padding: 0.8rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+}
+
+#ladder-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 2rem;
+    padding: 20px;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+}
+
+#result-list {
+    margin: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.result-item .name { font-weight: 700; color: var(--secondary); }
+.result-item .menu { color: var(--primary); font-weight: 700; }
+
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    opacity: 0.5;
+}

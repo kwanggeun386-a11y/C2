@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>점심 메뉴 사다리 타기 | Lunch Ladder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glow-text">🍱 점심 메뉴 사다리</h1>
+            <p>오늘 뭐 먹지? 사다리에게 맡겨보세요!</p>
+        </header>
+
+        <main>
+            <section id="setup-section" class="glass-panel">
+                <div class="input-group">
+                    <label for="participant-count">참가 인원 (2~10)</label>
+                    <div class="counter">
+                        <button onclick="changeCount(-1)">-</button>
+                        <input type="number" id="participant-count" value="4" min="2" max="10" readonly>
+                        <button onclick="changeCount(1)">+</button>
+                    </div>
+                </div>
+                
+                <div id="inputs-container" class="inputs-grid">
+                    <!-- Dynamic inputs will be here -->
+                </div>
+
+                <button id="start-btn" class="btn-primary">사다리 생성하기</button>
+            </section>
+
+            <section id="game-section" class="glass-panel hidden">
+                <div id="ladder-container">
+                    <canvas id="ladder-canvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="run-btn" class="btn-primary">전체 결과 확인</button>
+                    <button id="reset-btn" class="btn-secondary">다시 설정</button>
+                </div>
+            </section>
+
+            <section id="result-section" class="glass-panel hidden">
+                <h2>🎉 결과 발표!</h2>
+                <div id="result-list"></div>
+                <button onclick="location.reload()" class="btn-primary">처음으로</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 Lunch Ladder Adventure</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
