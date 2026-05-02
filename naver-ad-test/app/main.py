@@ -3,9 +3,10 @@
 PROJECT_RULES.txt 섹션 26 기준
 
 실행 방법:
-  python app/main.py                                # GUI 모드 (Step 15 이후)
-  python app/main.py --init-db                      # DB 초기화
-  python app/main.py --test-file <파일경로>          # 파일 로드 CLI 테스트
+  python app/main.py                                 # GUI 모드 (Step 15 이후)
+  python app/main.py --init-db                       # DB 초기화
+  python app/main.py --test-file <파일경로>           # 파일 로드 테스트
+  python app/main.py --test-analyze <파일경로>        # 지표 계산 + action_list 테스트
 """
 import sys
 import argparse
@@ -50,24 +51,47 @@ def cmd_init_db() -> None:
     logger.info("--init-db 완료")
 
 
-def cmd_test_file(file_path: str) -> None:
-    """--test-file: 파일 로드 → 컬럼 매핑 → 검증 → 숫자 정리 결과 출력"""
+def _load_and_standardize(file_path: str):
+    """공통: 파일 로드 → 컬럼 매핑 → 검증 → 숫자 정리."""
     from app.core.file_loader import load_file
     from app.core.column_mapper import map_columns
     from app.core.validator import validate_columns
     from app.core.formatter import format_numeric_columns
 
-    logger = logging.getLogger(__name__)
     path = Path(file_path)
+    result = load_file(path)
+    if not result["success"]:
+        print(f"[실패] 파일 로드 오류: {result['error']}")
+        sys.exit(1)
 
+    df = result["df"]
+    df = map_columns(df)["df"]
+
+    validation = validate_columns(df)
+    if not validation["valid"]:
+        print(f"[중단] 필수 컬럼 누락: {validation['missing_required']}")
+        sys.exit(1)
+
+    warnings: list[str] = []
+    df = format_numeric_columns(df, warnings=warnings)
+    return df, validation
+
+
+def cmd_test_file(file_path: str) -> None:
+    """--test-file: 파일 로드 → 컬럼 매핑 → 검증 → 숫자 정리 결과 출력."""
+    from app.core.file_loader import load_file
+    from app.core.column_mapper import map_columns
+    from app.core.validator import validate_columns
+    from app.core.formatter import format_numeric_columns
+
+    path = Path(file_path)
     print(f"\n{'='*60}")
     print(f"[테스트] 파일: {path.name}")
     print(f"{'='*60}")
 
-    # 1. 파일 로드
     result = load_file(path)
     if not result["success"]:
-        print(f"[실패] 파일 로드 오류: {result['error']}")
+        print(f"[실패] {result['error']}")
         sys.exit(1)
 
     df = result["df"]
@@ -75,7 +99,6 @@ def cmd_test_file(file_path: str) -> None:
     print(f"    행 수: {len(df)}, 컬럼 수: {len(df.columns)}")
     print(f"    원본 컬럼: {list(df.columns)}")
 
-    # 2. 컬럼 매핑
     mapped = map_columns(df)
     df = mapped["df"]
     print(f"\n[2] 컬럼 매핑 완료")
@@ -84,37 +107,84 @@ def cmd_test_file(file_path: str) -> None:
         print(f"    미매핑: {mapped['unmapped']}")
     print(f"    표준화된 컬럼: {list(df.columns)}")
 
-    # 3. 컬럼 검증
     validation = validate_columns(df)
     print(f"\n[3] 컬럼 검증")
     print(f"    분석 가능: {validation['valid']}")
-    if validation["warnings"]:
-        for w in validation["warnings"]:
-            print(f"    ⚠ {w}")
+    for w in validation["warnings"]:
+        print(f"    ⚠ {w}")
     if validation["skip_analysis"]:
         print(f"    건너뜀: {validation['skip_analysis']}")
-
     if not validation["valid"]:
-        print(f"\n[중단] 필수 컬럼 누락으로 분석 불가.")
         sys.exit(1)
 
-    # 4. 숫자 정리
     fmt_warnings: list[str] = []
     df = format_numeric_columns(df, warnings=fmt_warnings)
     print(f"\n[4] 숫자 정리 완료")
-    if fmt_warnings:
-        for w in fmt_warnings:
-            print(f"    ⚠ {w}")
+    for w in fmt_warnings:
+        print(f"    ⚠ {w}")
 
-    # 5. 결과 미리보기
     numeric_cols = [c for c in ["impressions", "clicks", "cost",
                                  "purchase_conversions", "purchase_revenue"] if c in df.columns]
-    print(f"\n[5] 데이터 미리보기 (상위 5행, 주요 컬럼)")
     preview_cols = (["date"] if "date" in df.columns else []) + numeric_cols
+    print(f"\n[5] 데이터 미리보기 (상위 5행)")
     print(df[preview_cols].head(5).to_string(index=False))
 
     print(f"\n{'='*60}")
     print(f"[완료] 표준화 성공. 총 {len(df)}행 처리.")
+    print(f"{'='*60}\n")
+
+
+def cmd_test_analyze(file_path: str) -> None:
+    """--test-analyze: 지표 계산 + action_list 분석 결과 출력."""
+    from app.core.metrics import add_metrics_columns, aggregate_metrics
+    from app.core.analyzer import build_action_list, print_action_list
+
+    path = Path(file_path)
+    print(f"\n{'='*60}")
+    print(f"[분석] 파일: {path.name}")
+    print(f"{'='*60}")
+
+    df, validation = _load_and_standardize(file_path)
+
+    # 지표 계산
+    df = add_metrics_columns(df)
+    print(f"\n[1] 지표 계산 완료")
+
+    # 전체 합산 요약
+    summary = aggregate_metrics(df)
+    print(f"\n[2] 전체 요약")
+    print(f"    노출수:   {summary['impressions']:,.0f}")
+    print(f"    클릭수:   {summary['clicks']:,.0f}")
+    print(f"    총비용:   {summary['cost']:,.0f}원")
+    print(f"    CTR:      {summary['ctr']*100:.2f}%")
+    print(f"    CPC:      {summary['cpc']:,.0f}원")
+    print(f"    구매전환: {summary['purchase_conversions']:,.0f}")
+    print(f"    구매매출: {summary['purchase_revenue']:,.0f}원")
+    print(f"    구매CVR:  {summary['purchase_cvr']*100:.2f}%")
+    print(f"    구매CPA:  {summary['purchase_cpa']:,.0f}원")
+    print(f"    구매ROAS: {summary['purchase_roas']*100:.0f}%")
+
+    # 행별 지표 미리보기
+    metric_cols = [c for c in ["date", "search_term", "keyword", "campaign",
+                                "impressions", "clicks", "cost",
+                                "ctr", "cpc", "purchase_roas"] if c in df.columns]
+    print(f"\n[3] 행별 지표 미리보기 (상위 5행)")
+    preview = df[metric_cols].head(5).copy()
+    if "ctr" in preview.columns:
+        preview["ctr"] = preview["ctr"].apply(lambda x: f"{x*100:.2f}%")
+    if "cpc" in preview.columns:
+        preview["cpc"] = preview["cpc"].apply(lambda x: f"{x:,.0f}원")
+    if "purchase_roas" in preview.columns:
+        preview["purchase_roas"] = preview["purchase_roas"].apply(lambda x: f"{x*100:.0f}%")
+    print(preview.to_string(index=False))
+
+    # action_list
+    action_list = build_action_list(df)
+    print(f"\n[4] action_list ({len(action_list)}개)")
+    print_action_list(action_list)
+
+    print(f"\n{'='*60}")
+    print(f"[완료] 분석 완료. 총 {len(df)}행 처리.")
     print(f"{'='*60}\n")
 
 
@@ -131,6 +201,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--init-db", action="store_true", help="DB 초기화")
     parser.add_argument("--test-file", metavar="FILE", help="파일 로드 CLI 테스트")
+    parser.add_argument("--test-analyze", metavar="FILE", help="지표 계산 + action_list 테스트")
     return parser.parse_args()
 
 
@@ -148,6 +219,10 @@ def main() -> None:
 
     if args.test_file:
         cmd_test_file(args.test_file)
+        sys.exit(0)
+
+    if args.test_analyze:
+        cmd_test_analyze(args.test_analyze)
         sys.exit(0)
 
     run_gui()
